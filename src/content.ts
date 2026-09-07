@@ -4,12 +4,13 @@ export type MediaItem = {
   alt?: string
   poster?: string
   caption?: string
+  fit?: 'cover' | 'contain'
 }
 
 export type RideHop = {
   from: string
   to: string
-  vehicle?: 'bus' | 'pickup'
+  vehicle?: 'bus' | 'pickup' | 'boat'
 }
 
 export type BusLeg = RideHop & {
@@ -23,7 +24,28 @@ export type Beat = {
   nextLabel?: string
   buttonLabel?: string
   cuddle?: boolean
+  stargaze?: boolean
+  bleed?: boolean
+  magic?: {
+    afterSrc: string
+    teaseLabel: string
+    revealLabel: string
+  }
   busAfter?: BusLeg
+  spotify?: {
+    url: string
+    title: string
+    description: string
+    cover: string
+    tracks: { title: string; artist: string; cover: string }[]
+  }
+}
+
+export type ExtraSlide = {
+  type: 'image' | 'video' | 'end'
+  src?: string
+  overlay?: string
+  hold?: number
 }
 
 export type Content = {
@@ -32,6 +54,15 @@ export type Content = {
   intro: string
   beats: Beat[]
   ending: string
+  extraClip: {
+    youtubeId: string
+    title: string
+    artist: string
+    cover: string
+    duration: number
+    slides: ExtraSlide[]
+    ending: string
+  }
 }
 
 /**
@@ -372,6 +403,265 @@ export const content: Content = {
         then: { from: 'Chokoria', to: 'Dolphin Mor', vehicle: 'bus' },
       },
     },
+    {
+      media: [
+        {
+          type: 'video',
+          src: '/media/dolphin-lunch.mp4',
+          alt: 'lunch after reaching Dolphin Mor',
+        },
+      ],
+      text: 'In my head, Tmr onnnek khuda lagse special abar track kore ashar por kola ruti chara toh kisu khao nai. and we had lunch 4 ta baje here. the food wasnt the best but tmi mach nisila and ami murgi and we shared it ektu ektu kore duitai taste korsi. I love this janos. i really love this when we share food togather. koto baal saal try kori amra. er por amra tom tom niye eksathe beach jai jeikhane amder jonno boat wait kore.',
+      nextLabel: 'amra noukay kothay jacchi?',
+    },
+    {
+      media: [
+        {
+          type: 'video',
+          src: '/media/beach-tomtom.mp4',
+          alt: 'getting off the tom tom at the beach',
+        },
+      ],
+      title: 'Personal Vloger part: 3',
+      text: 'Amra Shondiya island a jacchi but Beach got me excited jano. I always wanted to go to the beach with you. Hopefully one day, but amra tom tom theke namte namte it got a bit dark. and in my head you were running on the beach in excitement. And what more can a man ask other than seeing their baccha happy.',
+      nextLabel: 'tmi happy toh?',
+    },
+    {
+      media: [
+        {
+          type: 'video',
+          src: '/media/boat-night.mp4',
+          alt: 'night boat journey after the beach',
+        },
+      ],
+      text: 'Of course i am. You existing. your presense always makes me happy more than anything in this small life of mine. ekhon kotha shuno. er por we started the boat journy jodio raat hoye gesilo. everyone got in. and tmi ami boat er ektu upor er place a bochilam. eksathe cegaiya. you leaned on me and we watched the light go down ashte ashte. jodio amra sunset dekhte parinai beacuse we were bit late. but that\'s fine. you were with me so regadless i was happy. and about others shobai boat e niche boshe chilo and sezan or ekta light diye was taking videos. (Bisash koren rasel bhai er por ja hoilo)',
+      buttonLabel: 'er por,Ki hoise?',
+      busAfter: { from: 'Beach', to: 'Shondiya', vehicle: 'boat' },
+    },
+    {
+      media: [
+        {
+          type: 'image',
+          src: '/media/stars-night.jpg',
+          alt: 'stars over the water on the way to Shondiya',
+          fit: 'contain',
+        },
+      ],
+      text: 'We watched the stars together. Dekho koto shundor. I held you tighter and kissed your forehead. Everyone else was stargazing as well. But bad news. Our boat got stuck and it couldn\'t reach all the way.',
+      nextLabel: 'ayhay ebar ki hobe?',
+      stargaze: true,
+      bleed: true,
+    },
+    {
+      media: [
+        {
+          type: 'video',
+          src: '/media/boat-drag.mp4',
+          alt: 'boatman dragging the boat toward the island',
+        },
+      ],
+      text: 'boat wala draged us till the put the boat can go. amra ekta nodi er moto kore island e dhuksilam. low tide dekhe and lok ta amder pura boat tene tene joto tuku parse nise. but pura nite pare nai.',
+      nextLabel: 'erpor?',
+    },
+    {
+      media: [
+        {
+          type: 'video',
+          src: '/media/water-down.mp4',
+          alt: 'getting down from the boat into the water',
+        },
+      ],
+      text: 'amra nodi typer jinish tar moddhei nama lagse. in my head. i went down age. er por i held you. tmke dhore dhore namaisi. and you were surprised je pani gorom chilo and mati ta ektu bali bali so tmi mojai paitesila. and we started walking to the land.',
+      buttonLabel: 'mojjaaaaaaaaaa',
+    },
+    {
+      media: [
+        {
+          type: 'video',
+          src: '/media/dance-1.mp4',
+          alt: 'us dancing while waiting',
+        },
+        {
+          type: 'video',
+          src: '/media/dance-2.mp4',
+          alt: 'dancing more while waiting',
+        },
+      ],
+      text: 'Our legs got dirty but we had to wait resort er lok ra boat theke bazar namanor jonno. Meanwhile we started dancing (very random of us). And in my mind even though your body is giving up you are the one who danced the most (I love admiring you when you are having fun).',
+      nextLabel: 'babu tired rest nibo',
+    },
+    {
+      media: [
+        {
+          type: 'video',
+          src: '/media/resort-face.mp4',
+          alt: 'your face getting brighter at the resort',
+        },
+      ],
+      text: 'after walking for another 30 min. we reached the resort. pura rasta chinta korsi ki na ki resort. but eto underwhelming. but in my head you were tao happy karon finally ektu rest nite parba. boshte parba. onnek kosto korso. but there was no light at all. off season dekhe shob nosto hoye chilo and they didn\'t even say anything about it. tmr onnek mejaj kharap hoise but all of a sudden your face got brighter.',
+      nextLabel: 'hu! kisher jonno?',
+    },
+    {
+      media: [
+        {
+          type: 'video',
+          src: '/media/swing.mp4',
+          alt: 'you on the swing at the resort',
+        },
+      ],
+      text: 'because you saw a swing and it instantly made you happy again. and you called me tmr sathe jawar jonno on the swing and we go sit to gather. reminded me of our winter resort swing. jokhon moddho raat porjnot just dolnay gejaisi amra. i love seeing you happy. makes my day the brightest. and it instantly made me cheerful. i was pushing u dolnay and you were enjoying youself.',
+      buttonLabel: 'err por ki ki korsi?',
+    },
+    {
+      media: [
+        {
+          type: 'image',
+          src: '/media/saved-spot.jpg',
+          alt: 'saving a spot for you on the bench',
+          fit: 'contain',
+        },
+      ],
+      title: 'I saved a spot for you',
+      text: 'In reality you were not there my hands were shaking all of a sudden and my heart was heavy but i kept a sit beside me always empty. so that you could come and sit with me. in my mind you did came and sit beside me keeping your head on my shoulder. Making my heart calm again. You make my heart calm and peaceful.',
+      magic: {
+        afterSrc: '/media/saved-spot-together.png',
+        teaseLabel: 'click 3 times to see magic',
+        revealLabel: 'Ki shundor',
+      },
+    },
+    {
+      media: [
+        {
+          type: 'image',
+          src: '/media/muri-makha.jpg',
+          alt: 'first muri makha',
+          fit: 'contain',
+        },
+        {
+          type: 'image',
+          src: '/media/tuna-grill.jpg',
+          alt: 'grilled tuna after',
+          fit: 'contain',
+        },
+      ],
+      text: 'IKR. amra khawar dawar kori. first muri makha and after than tuna fish grilled (ekdomi bhalo chilona tuna ta tmi thakle marta hoyto).',
+      buttonLabel: 'er por?',
+    },
+    {
+      media: [
+        {
+          type: 'image',
+          src: '/media/hangout-night.jpg',
+          alt: 'everyone hanging out at night',
+          fit: 'contain',
+        },
+      ],
+      text: 'we hangout eksathe shobai. talking about the first time they had pot. you were having a lot of fun. and we were playing alot of soothing music.',
+      nextLabel: 'Kon kon gaan shunso?',
+      bleed: true,
+    },
+    {
+      media: [],
+      text: 'don\'t worry i got you coverd i created a playlist with all the music we played and in order we played it so that i can share it with you.',
+      buttonLabel: 'erpor',
+      spotify: {
+        url: 'https://open.spotify.com/playlist/7Mw7z7BaRFLuSGy28iWeTg?si=Wb5shi3-THKl_NI2d2WQQg&utm_source=copy-link&pi=0gzVndiEQHO8m',
+        title: 'Night playlist for muni',
+        description: 'Please come here join me, i saved a spot for you.',
+        cover: '/media/covers/playlist-muni.jpg',
+        tracks: [
+          { title: 'Ekhon Onek Raat', artist: 'Anupam Roy', cover: '/media/covers/01-ekhon-onek-raat.jpg' },
+          { title: 'Hum tum kitne paas hai kitne', artist: 'Amit Kumar', cover: '/media/covers/02-hum-tum.jpg' },
+          { title: 'Tumi', artist: 'Level Five', cover: '/media/covers/03-tumi.jpg' },
+          { title: 'Rong Cha', artist: 'Kaaktaal', cover: '/media/covers/04-rong-cha.jpg' },
+          { title: 'E Hawa', artist: 'Meghdol', cover: '/media/covers/05-e-hawa.jpg' },
+          { title: 'Prithibi Tumi Sere Jao Ft. Debayan Banerjee', artist: 'Chirkut', cover: '/media/covers/06-prithibi.jpg' },
+          { title: 'Take Me Home, Country Roads - Original Version', artist: 'John Denver', cover: '/media/covers/07-country-roads.jpg' },
+          { title: 'Co2', artist: 'Prateek Kuhad', cover: '/media/covers/08-co2.jpg' },
+          { title: 'K.', artist: 'Cigarettes After Sex', cover: '/media/covers/09-k.jpg' },
+          { title: 'cold/mess', artist: 'Prateek Kuhad', cover: '/media/covers/10-cold-mess.jpg' },
+          { title: 'Teri Yeh Baatein - From "Kho Gaye Hum Kahan"', artist: 'OAFF, Savera, Ankur Tewari', cover: '/media/covers/11-teri-yeh-baatein.jpg' },
+          { title: 'Baahon Mein Teri - From "Kho Gaye Hum Kahan"', artist: 'Ankur Tewari', cover: '/media/covers/12-baahon-mein-teri.jpg' },
+          { title: 'Rain Is the Most Beautiful Girl I\'ve Ever Seen', artist: 'Kaaktaal', cover: '/media/covers/13-rain.jpg' },
+          { title: 'Sailor Song', artist: 'Gigi Perez', cover: '/media/covers/14-sailor-song.jpg' },
+          { title: 'Khat', artist: 'Navjot Ahuja', cover: '/media/covers/15-khat.jpg' },
+        ],
+      },
+    },
+    {
+      media: [
+        {
+          type: 'image',
+          src: '/media/beach-sleep.jpg',
+          alt: 'sleeping outside on the beach',
+          fit: 'contain',
+        },
+      ],
+      text: 'Resort er room er jei abosta we had to sleep outside beach a. in my head i sit there and you slept on my legs. or we tried. and i played with your hair all night while we are under the sky andtmke ador kore ghum parai dicchi and shokal a uthe we see the beach togather raat er jonno beach explore korte parinai amara. i wake you up kissie diye and calling you "Muni utho" and when you open your eyes you see something.',
+      nextLabel: 'what do i see?',
+    },
+    {
+      media: [
+        {
+          type: 'image',
+          src: '/media/beach-spot.jpg',
+          alt: 'saving a sit on the beach',
+          fit: 'contain',
+        },
+      ],
+      title: 'I saved a spot for you (2)',
+      text: 'You see me waiting for you. I will always wait for you, Lisa. A seat saved on the beach. In my own world you came and sat beside me, ekta chador niye, and we pull it around both of us. We watch the beach together. Sand under our feet. Cold breeze on our faces. I look at you. You look at me. We kiss, and I kiss your forehead. Maybe a tear falls. Maybe I start shaking a little. Maybe I hold you tighter and tell you, "Lisa, I love you. I love you with all my heart. It might not be much, Lisa, but that\'s all I have. I will always save a spot for you, Lisa. Always and forever."',
+      buttonLabel: 'Press to start the end of the story',
+    },
   ],
-  ending: 'That is everything I could bring back.',
+  ending:
+    'I love you, Muni.\nWith the last bit of love I have left in me. Maybe it is not something worth fighting for, but that\'s all I have.\nAnd that\'s everything I could bring for you from the tour, baccha.\nI missed you so much I can barely stand it.\nCan you please give me a hug? Please?',
+  extraClip: {
+    youtubeId: 'PezEbnqpIso',
+    title: 'Hum tum kitne paas hai kitne',
+    artist: 'Amit Kumar',
+    cover: '/media/extra/song-cover.jpg',
+    duration: 60,
+    ending: 'now you can open the box.',
+    slides: [
+      { type: 'image', src: '/media/extra/slide-01.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-02.jpg', hold: 1800 },
+      { type: 'video', src: '/media/extra/clip-2444.mp4' },
+      {
+        type: 'image',
+        src: '/media/extra/slide-03.jpg',
+        hold: 6100,
+        overlay:
+          'we returned from the island the next morning. oder eto baje service dekhe. and i was missing you so much that i was so far from you. and when i can\'t feel your presence my everything feels shaken and i cant hold my tired. i had to come back to dhaka instantly and got into the next bus i got. alone.',
+      },
+      { type: 'image', src: '/media/extra/slide-04.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-05.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-06.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-07.jpg', hold: 1800 },
+      { type: 'video', src: '/media/extra/clip-2466.mp4' },
+      {
+        type: 'image',
+        src: '/media/extra/slide-08.jpg',
+        hold: 3200,
+        overlay:
+          'Just to feel a bit of your presence. Any presence. I took your socks. Just so I could have something of yours. Just to feel a bit closer.',
+      },
+      { type: 'image', src: '/media/extra/slide-14.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-09.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-10.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-11.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-12.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-13.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-15.jpg', hold: 1800 },
+      { type: 'image', src: '/media/extra/slide-16.jpg', hold: 1800 },
+      {
+        type: 'image',
+        src: '/media/extra/slide-last.jpg',
+        hold: 6100,
+        overlay:
+          'Maybe I did not have to return home alone. I keep seeing it. Us. Cuddled all the way to Dhaka. I wanted that so badly. I came back by myself anyway. The end.',
+      },
+      { type: 'end', hold: 0 },
+    ],
+  },
 }

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { content, type BusLeg, type MediaItem, type RideHop } from './content'
+import { useEffect, useRef, useState } from 'react'
+import { content, type Beat, type BusLeg, type Content, type MediaItem, type RideHop } from './content'
 
-type Screen = 'intro' | 'journey' | 'end'
+type Screen = 'intro' | 'journey' | 'end' | 'extra'
 
 type PetWho = 'eve' | 'lilith' | 'frog'
 type PetSpot =
@@ -48,6 +48,21 @@ const BEAT_PETS: Record<number, PetPlace[]> = {
   19: [{ who: 'frog', spot: 'btn-left' }],
   20: [{ who: 'lilith', spot: 'photo-peek' }],
   21: [{ who: 'eve', spot: 'flower' }],
+  22: [{ who: 'frog', spot: 'btn-side' }],
+  23: [{ who: 'eve', spot: 'photo-peek' }],
+  24: [{ who: 'lilith', spot: 'peek-left' }],
+  25: [{ who: 'eve', spot: 'peek-left' }],
+  26: [{ who: 'frog', spot: 'btn-side' }],
+  27: [{ who: 'lilith', spot: 'peek-left' }],
+  28: [{ who: 'eve', spot: 'photo-peek' }],
+  29: [{ who: 'frog', spot: 'btn-side' }],
+  30: [{ who: 'lilith', spot: 'photo-peek' }],
+  31: [{ who: 'eve', spot: 'peek-left' }],
+  32: [{ who: 'frog', spot: 'btn-side' }],
+  33: [{ who: 'lilith', spot: 'peek-left' }],
+  34: [{ who: 'eve', spot: 'btn-side' }],
+  35: [{ who: 'lilith', spot: 'photo-peek' }],
+  36: [{ who: 'eve', spot: 'peek-left' }],
 }
 
 const END_PETS: PetPlace[] = [
@@ -61,6 +76,7 @@ export default function App() {
   const [beatIndex, setBeatIndex] = useState(0)
   const [busRide, setBusRide] = useState<BusLeg | null>(null)
   const [dir, setDir] = useState<'fwd' | 'back'>('fwd')
+  const appRef = useRef<HTMLDivElement>(null)
 
   const beat = content.beats[beatIndex]
   const isFirstBeat = beatIndex === 0
@@ -95,14 +111,19 @@ export default function App() {
     }
 
     if (screen === 'journey') {
-      setScreen('end')
+      setScreen('extra')
     }
   }
 
   const goBack = () => {
     setDir('back')
-    if (screen === 'end') {
+    if (screen === 'extra') {
       setScreen('journey')
+      return
+    }
+
+    if (screen === 'end') {
+      setScreen('extra')
       return
     }
 
@@ -134,9 +155,31 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   })
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    appRef.current?.scrollTo(0, 0)
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+  }, [screen, beatIndex, busRide])
+
   return (
-    <div className="app">
+    <div
+      className={`app${screen === 'journey' && beat?.bleed ? ' night-bleed' : ''}${screen === 'extra' ? ' night-bleed extra-open' : ''}${screen === 'end' ? ' night-bleed' : ''}`}
+      ref={appRef}
+    >
       <SkyBits />
+      {screen === 'journey' && beat?.bleed && beat.media[0] ? (
+        <div className="bleed-photo" aria-hidden="true">
+          <img src={beat.media[0].src} alt="" />
+          <div className="bleed-wash" />
+        </div>
+      ) : null}
+      {screen === 'end' ? (
+        <div className="bleed-photo end-sand" aria-hidden="true">
+          <img src="/media/muni-sand.jpg" alt="" />
+          <div className="bleed-wash" />
+        </div>
+      ) : null}
       {screen === 'intro' && (
         <section className={`panel intro enter-${dir}`} key="intro">
           <IntroScene />
@@ -150,7 +193,7 @@ export default function App() {
       )}
 
       {screen === 'journey' && beat && (
-        <section className={`panel journey enter-${dir}`} key={`beat-${beatIndex}`}>
+        <section className={`panel journey enter-${dir}${beat.bleed ? ' bleed' : ''}`} key={`beat-${beatIndex}`}>
           <PageSparkle />
           <PetStickers pets={BEAT_PETS[beatIndex] ?? []} />
           <header className="topbar">
@@ -162,7 +205,15 @@ export default function App() {
             </p>
           </header>
 
-          <MediaStage items={beat.media} />
+          {beat.magic ? (
+            <MagicScene beat={beat} onNext={goNext} />
+          ) : (
+            <>
+          {beat.spotify ? (
+            <SpotifyDeck playlist={beat.spotify} />
+          ) : beat.bleed ? null : (
+            <MediaStage items={beat.media} />
+          )}
           {beat.title ? <h2 className="beat-title">{beat.title}</h2> : null}
           {beat.text ? <p className="copy beat-copy">{beat.text}</p> : null}
 
@@ -189,6 +240,22 @@ export default function App() {
                 />
               </div>
             </div>
+          ) : beat.stargaze ? (
+            <StargazeScene label={beat.nextLabel ?? 'ayhay ebar ki hobe?'} onNext={goNext} />
+          ) : beat.spotify ? (
+            <div className="spotify-actions">
+              <a
+                className="pixel-btn spotify-open"
+                href={beat.spotify.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                open in Spotify
+              </a>
+              <button type="button" className="pixel-btn" onClick={goNext}>
+                {beat.buttonLabel ?? 'erpor'}
+              </button>
+            </div>
           ) : (
             <button
               type="button"
@@ -205,26 +272,345 @@ export default function App() {
               )}
             </button>
           )}
+            </>
+          )}
         </section>
       )}
 
       {busRide &&
         (busRide.then ? (
           <ComboRide ride={busRide} onDone={finishBusRide} />
+        ) : busRide.vehicle === 'boat' ? (
+          <BoatRide ride={busRide} onDone={finishBusRide} />
         ) : (
           <BusRide ride={busRide} onDone={finishBusRide} />
         ))}
 
+      {screen === 'extra' && (
+        <ExtraClip
+          onDone={() => {
+            setDir('fwd')
+            setScreen('end')
+          }}
+          onBack={goBack}
+        />
+      )}
+
       {screen === 'end' && (
-        <section className={`panel intro enter-${dir}`} key="end">
+        <section className={`panel intro end-bleed enter-${dir}`} key="end">
           <PetStickers pets={END_PETS} />
           <PixelHeart />
           <p className="copy">{content.ending}</p>
           <button type="button" className="ghost-btn" onClick={goBack}>
             back
           </button>
+          <img className="end-hug" src="/intro/end-hug.png?v=2" alt="" />
         </section>
       )}
+    </div>
+  )
+}
+
+type TubePlayer = {
+  playVideo: () => void
+  pauseVideo: () => void
+  getPlayerState: () => number
+  getCurrentTime: () => number
+  getDuration: () => number
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void
+  mute: () => void
+  unMute: () => void
+  isMuted: () => boolean
+}
+
+/**
+ * Full-bleed extra clip: song plus photos and videos, then the last line.
+ */
+function ExtraClip({ onDone, onBack }: { onDone: () => void; onBack: () => void }) {
+  const clip = content.extraClip
+  const [index, setIndex] = useState(0)
+  const [playing, setPlaying] = useState(true)
+  const slide = clip.slides[index]
+  const isLast = index >= clip.slides.length - 1
+  const holdMs = slide?.hold ?? (slide?.type === 'end' ? 0 : 4200)
+  const remainRef = useRef(holdMs)
+  const indexRef = useRef(index)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    if (indexRef.current !== index) {
+      indexRef.current = index
+      remainRef.current = holdMs
+    }
+    if (!slide || slide.type === 'video') {
+      return
+    }
+    if (slide.type === 'end' && !holdMs) {
+      return
+    }
+    if (!playing) {
+      return
+    }
+    const wait = remainRef.current
+    const started = Date.now()
+    const timer = window.setTimeout(() => {
+      remainRef.current = holdMs
+      setIndex((current) => Math.min(current + 1, clip.slides.length - 1))
+    }, wait)
+    return () => {
+      window.clearTimeout(timer)
+      remainRef.current = Math.max(0, wait - (Date.now() - started))
+    }
+  }, [clip.slides.length, holdMs, index, playing, slide])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) {
+      return
+    }
+    if (playing) {
+      void video.play().catch(() => {
+        /* autoplay can fail until a tap */
+      })
+      return
+    }
+    video.pause()
+  }, [playing, slide])
+
+  if (!slide) {
+    return null
+  }
+
+  return (
+    <div
+      className="extra-clip"
+      onClick={() => {
+        if (isLast) {
+          onDone()
+          return
+        }
+        setIndex((current) => current + 1)
+      }}
+    >
+      {slide.type === 'video' && slide.src ? (
+        <video
+          key={slide.src}
+          ref={videoRef}
+          className="extra-media"
+          src={slide.src}
+          autoPlay={playing}
+          muted
+          playsInline
+          onEnded={() => setIndex((current) => current + 1)}
+        />
+      ) : null}
+      {slide.type === 'image' && slide.src ? (
+        <img key={slide.src} className="extra-media" src={slide.src} alt="" />
+      ) : null}
+      {slide.type === 'end' ? <div className="extra-media extra-end-bg" /> : null}
+      {slide.overlay ? <p className="extra-overlay">{slide.overlay}</p> : null}
+      {slide.type === 'end' ? (
+        <div className="extra-end">
+          <p>{clip.ending}</p>
+          <span className="extra-open-hint">open the box</span>
+        </div>
+      ) : null}
+      <ExtraSongPlayer
+        clip={clip}
+        playing={playing}
+        onPlayingChange={setPlaying}
+        onBack={onBack}
+      />
+    </div>
+  )
+}
+
+function formatSongTime(seconds: number) {
+  const safe = Math.max(0, Math.floor(seconds || 0))
+  const mins = Math.floor(safe / 60)
+  const secs = String(safe % 60).padStart(2, '0')
+  return `${mins}:${secs}`
+}
+
+/**
+ * Mini player over the extra clip: cover, play/pause, seek, mute.
+ */
+function ExtraSongPlayer({
+  clip,
+  playing,
+  onPlayingChange,
+  onBack,
+}: {
+  clip: Content['extraClip']
+  playing: boolean
+  onPlayingChange: (playing: boolean) => void
+  onBack: () => void
+}) {
+  const hostRef = useRef<HTMLDivElement>(null)
+  const playerRef = useRef<TubePlayer | null>(null)
+  const barRef = useRef<HTMLDivElement>(null)
+  const [ready, setReady] = useState(false)
+  const [muted, setMuted] = useState(false)
+  const [time, setTime] = useState(0)
+  const [duration, setDuration] = useState(clip.duration)
+
+  useEffect(() => {
+    let cancelled = false
+    const host = hostRef.current
+    if (!host) {
+      return
+    }
+
+    const startPlayer = () => {
+      const YT = (window as Window & { YT?: { Player: new (el: HTMLElement, opts: object) => TubePlayer } }).YT
+      if (!YT || cancelled) {
+        return
+      }
+      playerRef.current = new YT.Player(host, {
+        videoId: clip.youtubeId,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          disablekb: 1,
+          iv_load_policy: 3,
+        },
+        events: {
+          onReady: (event: { target: TubePlayer }) => {
+            playerRef.current = event.target
+            event.target.playVideo()
+            const length = event.target.getDuration()
+            if (length) {
+              setDuration(length)
+            }
+            setReady(true)
+          },
+          onStateChange: (event: { data: number }) => {
+            onPlayingChange(event.data === 1)
+          },
+        },
+      })
+    }
+
+    const win = window as Window & { onYouTubeIframeAPIReady?: () => void; YT?: { Player: unknown } }
+    if (win.YT?.Player) {
+      startPlayer()
+    } else {
+      const previous = win.onYouTubeIframeAPIReady
+      win.onYouTubeIframeAPIReady = () => {
+        previous?.()
+        startPlayer()
+      }
+      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        const script = document.createElement('script')
+        script.src = 'https://www.youtube.com/iframe_api'
+        document.head.appendChild(script)
+      }
+    }
+
+    const tick = window.setInterval(() => {
+      const player = playerRef.current
+      if (!player?.getCurrentTime) {
+        return
+      }
+      try {
+        setTime(player.getCurrentTime())
+        const length = player.getDuration()
+        if (length) {
+          setDuration(length)
+        }
+      } catch {
+        /* player not ready */
+      }
+    }, 250)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(tick)
+    }
+  }, [clip.youtubeId])
+
+  const seekFromClientX = (clientX: number) => {
+    const bar = barRef.current
+    const player = playerRef.current
+    if (!bar || !player || !duration) {
+      return
+    }
+    const box = bar.getBoundingClientRect()
+    const ratio = Math.min(1, Math.max(0, (clientX - box.left) / box.width))
+    player.seekTo(ratio * duration, true)
+    setTime(ratio * duration)
+  }
+
+  return (
+    <div
+      className="extra-player"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <div className="extra-yt-host" ref={hostRef} />
+      <img className="extra-player-cover" src={clip.cover} alt="" />
+      <div className="extra-player-meta">
+        <p className="extra-player-title">{clip.title}</p>
+        <p className="extra-player-artist">{clip.artist}</p>
+        <div
+          className="extra-player-bar"
+          ref={barRef}
+          onClick={(event) => seekFromClientX(event.clientX)}
+        >
+          <span
+            className="extra-player-fill"
+            style={{ width: `${duration ? (time / duration) * 100 : 0}%` }}
+          />
+        </div>
+        <p className="extra-player-time">
+          {formatSongTime(time)} / {formatSongTime(duration)}
+        </p>
+      </div>
+      <button type="button" className="extra-player-btn" onClick={onBack}>
+        back
+      </button>
+      <button
+        type="button"
+        className="extra-player-btn"
+        disabled={!ready}
+        onClick={() => {
+          const player = playerRef.current
+          if (!player) {
+            return
+          }
+          if (playing) {
+            player.pauseVideo()
+            onPlayingChange(false)
+            return
+          }
+          player.playVideo()
+          onPlayingChange(true)
+        }}
+      >
+        {playing ? 'pause' : 'play'}
+      </button>
+      <button
+        type="button"
+        className="extra-player-btn"
+        disabled={!ready}
+        onClick={() => {
+          const player = playerRef.current
+          if (!player) {
+            return
+          }
+          if (muted) {
+            player.unMute()
+            setMuted(false)
+            return
+          }
+          player.mute()
+          setMuted(true)
+        }}
+      >
+        {muted ? 'sound' : 'mute'}
+      </button>
     </div>
   )
 }
@@ -244,7 +630,7 @@ function MediaStage({ items }: { items: MediaItem[] }) {
         <div
           className={`polaroid media-polaroid tilt-${itemIndex % 2 === 0 ? 'left' : 'right'}`}
         >
-          <div className="photo">
+          <div className={`photo${item.fit === 'contain' ? ' fit-contain' : ''}`}>
             {item.type === 'video' ? (
               <video
                 src={item.src}
@@ -261,6 +647,107 @@ function MediaStage({ items }: { items: MediaItem[] }) {
         </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function MagicScene({ beat, onNext }: { beat: Beat; onNext: () => void }) {
+  const [clicks, setClicks] = useState(0)
+  const magic = beat.magic
+  const before = beat.media[0]
+  const revealed = clicks >= 3
+
+  useEffect(() => {
+    if (!magic) {
+      return
+    }
+    const preload = new Image()
+    preload.src = magic.afterSrc
+  }, [magic])
+
+  if (!magic || !before) {
+    return null
+  }
+
+  return (
+    <>
+      <div className="polaroid-stack">
+        <div className="polaroid-enter">
+          <div className="polaroid media-polaroid tilt-left">
+            <div className="photo fit-contain magic-photo">
+              <img src={before.src} alt={before.alt ?? ''} />
+              <img
+                className={`magic-after${revealed ? ' on' : ''}`}
+                src={magic.afterSrc}
+                alt=""
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      {beat.title ? <h2 className="beat-title">{beat.title}</h2> : null}
+      {beat.text ? <p className="copy beat-copy">{beat.text}</p> : null}
+      {!revealed ? (
+        <button
+          type="button"
+          className="pixel-btn"
+          onClick={() => setClicks((count) => count + 1)}
+        >
+          {magic.teaseLabel}
+          <span className="magic-count">{clicks}/3</span>
+        </button>
+      ) : (
+        <button type="button" className="pixel-btn" onClick={onNext}>
+          {magic.revealLabel}
+        </button>
+      )}
+    </>
+  )
+}
+
+/**
+ * Shows the playlist title, description, and every track in play order.
+ */
+function SpotifyDeck({ playlist }: { playlist: NonNullable<Beat['spotify']> }) {
+  return (
+    <div className="spotify-deck">
+      <img className="playlist-cover" src={playlist.cover} alt="" />
+      <h2 className="playlist-title">{playlist.title}</h2>
+      <p className="playlist-desc">{playlist.description}</p>
+      <ol className="track-list">
+        {playlist.tracks.map((track, index) => (
+          <li key={`${track.title}-${index}`}>
+            <span className="track-num">{index + 1}</span>
+            <img className="track-cover" src={track.cover} alt="" />
+            <span className="track-meta">
+              <span className="track-name">{track.title}</span>
+              <span className="track-artist">{track.artist}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+function StargazeScene({ label, onNext }: { label: string; onNext: () => void }) {
+  return (
+    <div className="cuddle-scene stargaze-scene">
+      <p className="press-hint" aria-hidden="true">
+        Press me
+        <span className="press-arrow" />
+      </p>
+      <button type="button" className="pixel-btn speech-btn" onClick={onNext}>
+        <span className="speech-who">You:</span>
+        {label}
+      </button>
+      <div className="cuddle-puppet stargaze-puppet" aria-hidden="true">
+        <img
+          className="cuddle-still kiss-still"
+          src="/intro/stargaze-kiss.png?v=3"
+          alt=""
+        />
+      </div>
     </div>
   )
 }
@@ -407,6 +894,97 @@ function PixelVehicle({ kind }: { kind: 'bus' | 'pickup' }) {
         </g>
       </g>
     </g>
+  )
+}
+
+function PixelNouka() {
+  return (
+    <g transform="translate(-22, -18)">
+      <rect className="wake w1" x="-10" y="12" width="8" height="3" fill="#d8eef6" />
+      <rect className="wake w2" x="-18" y="16" width="6" height="3" fill="#c3e4f0" />
+      <rect className="wake w3" x="-8" y="20" width="5" height="2" fill="#e7f6fb" />
+      <rect x="6" y="8" width="28" height="8" fill="#c9844a" />
+      <rect x="2" y="10" width="8" height="6" fill="#a86a38" />
+      <rect x="30" y="6" width="10" height="8" fill="#a86a38" />
+      <rect x="36" y="2" width="6" height="8" fill="#8b542c" />
+      <rect x="14" y="4" width="4" height="6" fill="#fff6eb" />
+      <rect x="22" y="4" width="4" height="6" fill="#ffb3c6" />
+      <rect x="16" y="0" width="3" height="6" fill="#3a2433" />
+      <rect x="12" y="-8" width="10" height="8" fill="#ffe28a" />
+    </g>
+  )
+}
+
+function PalmIcon({ x, y }: { x: number; y: number }) {
+  return (
+    <g transform={`translate(${x}, ${y})`}>
+      <rect x="8" y="10" width="4" height="14" fill="#8b542c" />
+      <rect x="2" y="4" width="16" height="4" fill="#4e7d5c" />
+      <rect x="6" y="0" width="8" height="4" fill="#5a8f6a" />
+    </g>
+  )
+}
+
+function BoatRide({ ride, onDone }: { ride: BusLeg; onDone: () => void }) {
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const wait = reduced ? 400 : 5600
+    const timer = window.setTimeout(onDone, wait)
+    return () => window.clearTimeout(timer)
+  }, [onDone])
+
+  return (
+    <div className="bus-ride boat-ride" role="status">
+      <div className="dusk-wash" />
+      <div className="night-wash" />
+      <p className="bus-title">{ride.from} to {ride.to}</p>
+      <div className="pixel-map boat-map">
+        <svg
+          className="map-svg"
+          viewBox="0 0 360 220"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+          shapeRendering="crispEdges"
+        >
+          <rect className="boat-sky-day" width="360" height="110" fill="#f3b07a" />
+          <rect className="boat-sky-night" width="360" height="110" fill="#1b2438" />
+          <rect x="140" y="18" width="22" height="22" fill="#ffbf12" className="boat-sun" />
+          <rect x="240" y="22" width="10" height="10" fill="#fff6eb" className="boat-moon" />
+          <rect x="256" y="28" width="6" height="6" fill="#fff6eb" className="boat-moon" />
+          <rect y="108" width="360" height="112" fill="#5bb3d3" className="boat-sea-day" />
+          <rect y="108" width="360" height="112" fill="#24364a" className="boat-sea-night" />
+          <path
+            d="M20 148 H340"
+            fill="none"
+            stroke="#3a2433"
+            strokeWidth="2"
+            strokeDasharray="6 8"
+            className="route-line"
+          />
+
+          <rect x="0" y="118" width="78" height="102" fill="#e8d7b8" />
+          <rect x="0" y="150" width="78" height="70" fill="#d7c4a8" />
+          <PalmIcon x={10} y={98} />
+          <PalmIcon x={40} y={108} />
+
+          <rect x="268" y="100" width="92" height="120" fill="#6bb07e" />
+          <rect x="286" y="88" width="56" height="28" fill="#4e7d5c" />
+          <PalmIcon x={292} y={78} />
+          <PalmIcon x={322} y={86} />
+
+          <MapPin x={46} y={140} />
+          <MapPin x={314} y={132} fill="#5bb3d3" />
+
+          <g className="nouka">
+            <g className="nouka-bob">
+              <PixelNouka />
+            </g>
+          </g>
+        </svg>
+        <span className="map-label start">Beach</span>
+        <span className="map-label end">{ride.to}</span>
+      </div>
+    </div>
   )
 }
 
@@ -690,9 +1268,17 @@ function IntroScene() {
         </div>
         <p className="polaroid-cap">us</p>
         <img className="pet eve" src="/intro/eve.png?v=2" alt="" />
+        <span className="pet-tag eve-tag">
+          Eve
+          <span className="pet-tag-arrow" />
+        </span>
         <span className="pet lilith">
           <img src="/intro/lilith.png?v=2" alt="" />
           <img className="wag" src="/intro/lilith-wag.png" alt="" />
+        </span>
+        <span className="pet-tag lilith-tag">
+          Lilith
+          <span className="pet-tag-arrow" />
         </span>
         <img className="pet frog" src="/intro/frog.png" alt="" />
       </div>

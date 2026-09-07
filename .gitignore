@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Raw tour dump. Copy into public/media only when we use a clip.
+raw/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
