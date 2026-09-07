@@ -839,7 +839,11 @@ function DolphinIcon({ x, y }: { x: number; y: number }) {
   )
 }
 
-function PixelVehicle({ kind }: { kind: 'bus' | 'pickup' }) {
+function PixelVehicle({ kind }: { kind: 'bus' | 'pickup' | 'boat' }) {
+  if (kind === 'boat') {
+    return <PixelNouka />
+  }
+
   if (kind === 'pickup') {
     return (
       <g transform="translate(-20, -30)">
