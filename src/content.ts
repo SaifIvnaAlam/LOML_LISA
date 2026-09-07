@@ -626,7 +626,7 @@ export const content: Content = {
     slides: [
       { type: 'image', src: '/media/extra/slide-01.jpg', hold: 1800 },
       { type: 'image', src: '/media/extra/slide-02.jpg', hold: 1800 },
-      { type: 'video', src: '/media/extra/clip-2444.mp4' },
+      { type: 'video', src: '/media/extra/clip-2444.mp4', hold: 14000 },
       {
         type: 'image',
         src: '/media/extra/slide-03.jpg',
@@ -638,7 +638,7 @@ export const content: Content = {
       { type: 'image', src: '/media/extra/slide-05.jpg', hold: 1800 },
       { type: 'image', src: '/media/extra/slide-06.jpg', hold: 1800 },
       { type: 'image', src: '/media/extra/slide-07.jpg', hold: 1800 },
-      { type: 'video', src: '/media/extra/clip-2466.mp4' },
+      { type: 'video', src: '/media/extra/clip-2466.mp4', hold: 11000 },
       {
         type: 'image',
         src: '/media/extra/slide-08.jpg',
@@ -661,7 +661,7 @@ export const content: Content = {
         overlay:
           'Maybe I did not have to return home alone. I keep seeing it. Us. Cuddled all the way to Dhaka. I wanted that so badly. I came back by myself anyway. The end.',
       },
-      { type: 'end', hold: 0 },
+      { type: 'end', hold: 1400 },
     ],
   },
 }

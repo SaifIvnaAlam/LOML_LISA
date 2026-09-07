@@ -3,6 +3,20 @@ import { content, type Beat, type BusLeg, type Content, type MediaItem, type Rid
 
 type Screen = 'intro' | 'journey' | 'end' | 'extra'
 
+let extraGestureAt = 0
+
+function markExtraGesture() {
+  extraGestureAt = Date.now()
+}
+
+function extraGestureFresh() {
+  return Date.now() - extraGestureAt < 4000
+}
+
+function posterForVideo(src: string) {
+  return src.replace(/\.mp4$/i, '-poster.jpg')
+}
+
 type PetWho = 'eve' | 'lilith' | 'frog'
 type PetSpot =
   | 'bl'
@@ -111,6 +125,7 @@ export default function App() {
     }
 
     if (screen === 'journey') {
+      markExtraGesture()
       setScreen('extra')
     }
   }
@@ -161,6 +176,15 @@ export default function App() {
     document.documentElement.scrollTop = 0
     document.body.scrollTop = 0
   }, [screen, beatIndex, busRide])
+
+  useEffect(() => {
+    if (document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+      return
+    }
+    const script = document.createElement('script')
+    script.src = 'https://www.youtube.com/iframe_api'
+    document.head.appendChild(script)
+  }, [])
 
   return (
     <div
@@ -330,9 +354,12 @@ function ExtraClip({ onDone, onBack }: { onDone: () => void; onBack: () => void 
   const clip = content.extraClip
   const [index, setIndex] = useState(0)
   const [playing, setPlaying] = useState(true)
+  const songRef = useRef<{ unlock: () => void } | null>(null)
   const slide = clip.slides[index]
   const isLast = index >= clip.slides.length - 1
-  const holdMs = slide?.hold ?? (slide?.type === 'end' ? 0 : 4200)
+  const holdMs =
+    slide?.hold ??
+    (slide?.type === 'end' ? 1400 : slide?.type === 'video' ? 16000 : 4200)
   const remainRef = useRef(holdMs)
   const indexRef = useRef(index)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -342,14 +369,15 @@ function ExtraClip({ onDone, onBack }: { onDone: () => void; onBack: () => void 
       indexRef.current = index
       remainRef.current = holdMs
     }
-    if (!slide || slide.type === 'video') {
-      return
-    }
-    if (slide.type === 'end' && !holdMs) {
+    if (!slide) {
       return
     }
     if (!playing) {
       return
+    }
+    if (slide.type === 'end') {
+      const timer = window.setTimeout(onDone, holdMs)
+      return () => window.clearTimeout(timer)
     }
     const wait = remainRef.current
     const started = Date.now()
@@ -361,7 +389,7 @@ function ExtraClip({ onDone, onBack }: { onDone: () => void; onBack: () => void 
       window.clearTimeout(timer)
       remainRef.current = Math.max(0, wait - (Date.now() - started))
     }
-  }, [clip.slides.length, holdMs, index, playing, slide])
+  }, [clip.slides.length, holdMs, index, onDone, playing, slide])
 
   useEffect(() => {
     const video = videoRef.current
@@ -385,11 +413,13 @@ function ExtraClip({ onDone, onBack }: { onDone: () => void; onBack: () => void 
     <div
       className="extra-clip"
       onClick={() => {
+        markExtraGesture()
+        songRef.current?.unlock()
         if (isLast) {
           onDone()
           return
         }
-        setIndex((current) => current + 1)
+        setIndex((current) => Math.min(current + 1, clip.slides.length - 1))
       }}
     >
       {slide.type === 'video' && slide.src ? (
@@ -398,9 +428,11 @@ function ExtraClip({ onDone, onBack }: { onDone: () => void; onBack: () => void 
           ref={videoRef}
           className="extra-media"
           src={slide.src}
+          poster={posterForVideo(slide.src)}
           autoPlay={playing}
           muted
           playsInline
+          preload="auto"
           onEnded={() => setIndex((current) => current + 1)}
         />
       ) : null}
@@ -420,6 +452,8 @@ function ExtraClip({ onDone, onBack }: { onDone: () => void; onBack: () => void 
         playing={playing}
         onPlayingChange={setPlaying}
         onBack={onBack}
+        onEnded={onDone}
+        songRef={songRef}
       />
     </div>
   )
@@ -440,19 +474,24 @@ function ExtraSongPlayer({
   playing,
   onPlayingChange,
   onBack,
+  onEnded,
+  songRef,
 }: {
   clip: Content['extraClip']
   playing: boolean
   onPlayingChange: (playing: boolean) => void
   onBack: () => void
+  onEnded: () => void
+  songRef: { current: { unlock: () => void } | null }
 }) {
   const hostRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<TubePlayer | null>(null)
   const barRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
-  const [muted, setMuted] = useState(false)
+  const [muted, setMuted] = useState(true)
   const [time, setTime] = useState(0)
   const [duration, setDuration] = useState(clip.duration)
+  const endedRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -470,25 +509,41 @@ function ExtraSongPlayer({
         videoId: clip.youtubeId,
         playerVars: {
           autoplay: 1,
+          mute: 1,
           controls: 0,
           rel: 0,
           modestbranding: 1,
           playsinline: 1,
           disablekb: 1,
           iv_load_policy: 3,
+          origin: window.location.origin,
         },
         events: {
           onReady: (event: { target: TubePlayer }) => {
             playerRef.current = event.target
+            event.target.mute()
             event.target.playVideo()
+            if (extraGestureFresh()) {
+              event.target.unMute()
+              setMuted(false)
+            }
             const length = event.target.getDuration()
             if (length) {
-              setDuration(length)
+              setDuration(Math.min(length, clip.duration || length))
             }
             setReady(true)
           },
           onStateChange: (event: { data: number }) => {
-            onPlayingChange(event.data === 1)
+            if (event.data === 1) {
+              onPlayingChange(true)
+            }
+            if (event.data === 2) {
+              onPlayingChange(false)
+            }
+            if (event.data === 0 && !endedRef.current) {
+              endedRef.current = true
+              onEnded()
+            }
           },
         },
       })
@@ -516,21 +571,46 @@ function ExtraSongPlayer({
         return
       }
       try {
-        setTime(player.getCurrentTime())
+        const now = player.getCurrentTime()
+        setTime(now)
         const length = player.getDuration()
+        const cap = clip.duration || length
         if (length) {
-          setDuration(length)
+          setDuration(Math.min(length, cap))
+        }
+        if (!endedRef.current && cap && now >= cap - 0.2) {
+          endedRef.current = true
+          player.pauseVideo()
+          onEnded()
         }
       } catch {
         /* player not ready */
       }
     }, 250)
 
+    songRef.current = {
+      unlock: () => {
+        const player = playerRef.current
+        if (!player) {
+          return
+        }
+        try {
+          player.unMute()
+          player.playVideo()
+          setMuted(false)
+          onPlayingChange(true)
+        } catch {
+          /* player not ready */
+        }
+      },
+    }
+
     return () => {
       cancelled = true
       window.clearInterval(tick)
+      songRef.current = null
     }
-  }, [clip.youtubeId])
+  }, [clip.duration, clip.youtubeId, onEnded, onPlayingChange, songRef])
 
   const seekFromClientX = (clientX: number) => {
     const bar = barRef.current
@@ -585,6 +665,8 @@ function ExtraSongPlayer({
             onPlayingChange(false)
             return
           }
+          player.unMute()
+          setMuted(false)
           player.playVideo()
           onPlayingChange(true)
         }}
@@ -634,7 +716,7 @@ function MediaStage({ items }: { items: MediaItem[] }) {
             {item.type === 'video' ? (
               <video
                 src={item.src}
-                poster={item.poster}
+                poster={item.poster ?? posterForVideo(item.src)}
                 controls
                 playsInline
                 preload="metadata"

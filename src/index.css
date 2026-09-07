@@ -578,6 +578,7 @@ video {
   max-width: none;
   object-fit: cover;
   object-position: center;
+  background: #070b12;
 }
 
 .extra-end-bg {
@@ -833,10 +834,13 @@ video {
   height: min(28vh, 220px);
 }
 
-.media-polaroid .photo:has(video),
-.polaroid-stack.pair .media-polaroid .photo:has(video) {
-  height: auto;
+.media-polaroid .photo:has(video) {
+  height: min(46vh, 320px);
   max-height: 48vh;
+}
+
+.polaroid-stack.pair .media-polaroid .photo:has(video) {
+  height: min(28vh, 220px);
 }
 
 .media-copy {
@@ -901,9 +905,8 @@ video {
 .media-polaroid .photo video {
   display: block;
   width: 100%;
-  height: auto;
-  max-height: 48vh;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   background: #2a1a24;
 }
 
