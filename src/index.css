@@ -55,6 +55,7 @@ video {
     max(20px, env(safe-area-inset-left));
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   background-color: var(--cream);
   background-image: radial-gradient(rgba(255, 179, 198, 0.28) 1.2px, transparent 1.2px);
   background-size: 16px 16px;
@@ -67,7 +68,22 @@ video {
   min-height: calc(100dvh - 48px);
   display: flex;
   flex-direction: column;
-  animation: fade-up 360ms ease both;
+}
+
+.panel.enter-fwd {
+  animation: album-pop 540ms cubic-bezier(0.22, 1.28, 0.36, 1) both;
+}
+
+.panel.enter-back {
+  animation: album-back 440ms cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.journey.enter-fwd {
+  animation: scrapbook-in 680ms cubic-bezier(0.22, 1.42, 0.36, 1) both;
+}
+
+.journey.enter-back {
+  animation: scrapbook-back 520ms cubic-bezier(0.22, 1.28, 0.36, 1) both;
 }
 
 .intro {
@@ -170,6 +186,188 @@ video {
   animation: hop 1.8s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
 }
 
+.page-pets {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.page-pet {
+  position: absolute;
+  animation: sticker-slap 640ms cubic-bezier(0.28, 1.62, 0.42, 1) both;
+}
+
+.page-pet:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.page-pet:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+.pet-body {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pet-body.pet-eve {
+  width: 58px;
+  animation: float-y 2.8s ease-in-out infinite;
+}
+
+.pet-body.pet-frog {
+  width: 34px;
+  animation: hop 1.8s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+}
+
+.pet-body.pet-lilith {
+  position: relative;
+  display: block;
+  width: 78px;
+  height: 78px;
+}
+
+.pet-body.pet-lilith img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pet-body.pet-lilith .wag {
+  animation: tail-swap 0.85s steps(1, end) infinite;
+}
+
+.spot-photo-peek .pet-body.pet-eve,
+.spot-peek-left .pet-body.pet-eve,
+.spot-photo-peek .pet-body.pet-lilith,
+.spot-peek-left .pet-body.pet-lilith {
+  animation: peek-bob 2.2s ease-in-out infinite;
+}
+
+.spot-photo-peek .pet-body.pet-frog,
+.spot-peek-left .pet-body.pet-frog {
+  animation: peek-bob 1.8s ease-in-out infinite;
+}
+
+.spot-btn-left .pet-body.pet-frog {
+  animation: hop 1.8s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+}
+
+.spot-bl {
+  left: 0;
+  bottom: 10px;
+}
+
+.spot-br {
+  right: 0;
+  bottom: 12px;
+}
+
+.spot-tl {
+  left: 0;
+  top: 46px;
+}
+
+.spot-tr {
+  right: 0;
+  top: 44px;
+}
+
+.spot-photo-peek {
+  right: 2px;
+  top: 118px;
+}
+
+.spot-peek-left {
+  left: -2px;
+  top: 122px;
+}
+
+.spot-cuddle-right {
+  right: 0;
+  bottom: 22px;
+}
+
+.spot-btn-side {
+  right: 2px;
+  bottom: 64px;
+}
+
+.spot-btn-left {
+  left: 0;
+  bottom: 68px;
+}
+
+.spot-mid-right {
+  right: 0;
+  top: 42%;
+}
+
+.spot-flower {
+  left: 4px;
+  top: 96px;
+}
+
+.spot-end-left {
+  left: 8%;
+  top: 28%;
+}
+
+.spot-end-right {
+  right: 6%;
+  top: 30%;
+}
+
+.spot-end-bottom {
+  left: 50%;
+  bottom: 14%;
+  margin-left: -17px;
+}
+
+.page-sparkle {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mini-heart {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #ff7b9c;
+  box-shadow:
+    4px 0 0 #ff7b9c,
+    2px 4px 0 #ee5d82;
+  opacity: 0;
+  animation: heart-float 720ms ease-out both;
+}
+
+.mini-heart.h1 {
+  left: 18%;
+  top: 28%;
+  animation-duration: 820ms;
+}
+
+.mini-heart.h2 {
+  right: 16%;
+  top: 22%;
+  animation-delay: 80ms;
+  animation-duration: 760ms;
+}
+
+.mini-heart.h3 {
+  left: 58%;
+  top: 36%;
+  animation-delay: 140ms;
+}
+
 .hello {
   margin: 0;
   font-family: 'Pixelify Sans', monospace;
@@ -214,6 +412,7 @@ video {
   font-weight: 400;
   line-height: 1.55;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .intro-copy {
@@ -225,8 +424,16 @@ video {
 }
 
 .beat-copy {
+  position: relative;
+  z-index: 4;
   flex: 0 1 auto;
   text-align: left;
+}
+
+.journey .beat-title,
+.journey .media-copy {
+  position: relative;
+  z-index: 4;
 }
 
 .topbar {
@@ -253,6 +460,33 @@ video {
   flex-direction: column;
   gap: 14px;
   width: 100%;
+  padding-inline: 6px;
+}
+
+.polaroid-enter {
+  animation: polaroid-drop 700ms cubic-bezier(0.22, 1.4, 0.36, 1) both;
+}
+
+.polaroid-enter:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.polaroid-enter:nth-child(3) {
+  animation-delay: 150ms;
+}
+
+.polaroid-enter:nth-child(4) {
+  animation-delay: 210ms;
+}
+
+.journey .beat-title,
+.journey .beat-copy {
+  animation: fade-up 480ms ease both 180ms;
+}
+
+.journey .pixel-btn,
+.journey .speech-btn {
+  animation: btn-pop 560ms cubic-bezier(0.28, 1.58, 0.42, 1) backwards 280ms;
 }
 
 .media-polaroid {
@@ -479,7 +713,9 @@ video {
   transition: transform 80ms ease, box-shadow 80ms ease;
   white-space: normal;
   max-width: 100%;
+  width: min(100%, 22rem);
   text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .line-btn {
@@ -557,6 +793,129 @@ video {
   }
 }
 
+@keyframes album-pop {
+  0% {
+    opacity: 0;
+    transform: translateX(22px) translateY(10px) rotate(2.4deg) scale(0.94);
+  }
+  62% {
+    opacity: 1;
+    transform: translateX(-3px) translateY(-2px) rotate(-0.7deg) scale(1.015);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes album-back {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px) rotate(-2deg) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes scrapbook-in {
+  0% {
+    opacity: 0;
+    transform: translateX(28px) translateY(16px) rotate(4deg) scale(0.92);
+  }
+  58% {
+    opacity: 1;
+    transform: translateX(-6px) translateY(-5px) rotate(-1.6deg) scale(1.03);
+  }
+  78% {
+    transform: translateX(3px) translateY(2px) rotate(0.7deg) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes scrapbook-back {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px) translateY(8px) rotate(-3.2deg) scale(0.94);
+  }
+  62% {
+    opacity: 1;
+    transform: translateX(5px) translateY(-3px) rotate(1.1deg) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes polaroid-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-28px) rotate(-10deg) scale(0.82);
+  }
+  52% {
+    opacity: 1;
+    transform: translateY(7px) rotate(2.4deg) scale(1.05);
+  }
+  74% {
+    transform: translateY(-3px) rotate(-1.4deg) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sticker-slap {
+  0% {
+    opacity: 0;
+    transform: scale(0.12) rotate(-28deg) translateY(-12px);
+  }
+  62% {
+    opacity: 1;
+    transform: scale(1.18) rotate(9deg) translateY(3px);
+  }
+  82% {
+    transform: scale(0.94) rotate(-3deg) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg) translateY(0);
+  }
+}
+
+@keyframes btn-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) rotate(-3deg);
+  }
+  70% {
+    transform: scale(1.06) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes heart-float {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.4);
+  }
+  35% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-28px) scale(1);
+  }
+}
+
 @keyframes pulse {
   0%,
   100% {
@@ -593,7 +952,17 @@ video {
     -16px 0 0 #ff8a1a,
     0 16px 0 #ff8a1a,
     0 -16px 0 #ff8a1a;
-  animation: pulse 2.6s ease-in-out infinite;
+  --sun-scale: 1;
+  animation: sun-breathe 5.2s ease-in-out infinite;
+}
+
+.sun::after {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  background: radial-gradient(circle, rgba(255, 214, 80, 0.45) 0%, transparent 70%);
+  animation: sun-glow 5.2s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .cloud {
@@ -613,14 +982,53 @@ video {
   top: 42px;
   left: 14px;
   width: 44px;
-  animation: drift 8s ease-in-out infinite;
+  animation: cloud-float 16s ease-in-out infinite;
 }
 
 .cloud-b {
   top: 88px;
   right: 16px;
   width: 36px;
-  animation: drift 11s ease-in-out infinite reverse;
+  animation: cloud-float 20s ease-in-out infinite reverse;
+}
+
+.cloud-c {
+  top: 58px;
+  left: 42%;
+  width: 28px;
+  opacity: 0.88;
+  animation: cloud-float 18s ease-in-out infinite;
+  animation-delay: -7s;
+}
+
+.ride-sky {
+  z-index: 1;
+}
+
+.ride-sky .sun {
+  top: 18px;
+  right: 28px;
+}
+
+.ride-sky .cloud-a {
+  top: 16px;
+  left: 8%;
+  animation: cloud-drift 22s linear infinite;
+}
+
+.ride-sky .cloud-b {
+  top: 28px;
+  right: auto;
+  left: 58%;
+  animation: cloud-drift 28s linear infinite;
+  animation-delay: -10s;
+}
+
+.ride-sky .cloud-c {
+  top: 22px;
+  left: -8%;
+  animation: cloud-drift 24s linear infinite;
+  animation-delay: -16s;
 }
 
 @keyframes tail-swap {
@@ -665,6 +1073,16 @@ video {
   }
 }
 
+@keyframes peek-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(4deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(-3deg);
+  }
+}
+
 @keyframes wag {
   0%,
   100% {
@@ -685,6 +1103,50 @@ video {
   }
 }
 
+@keyframes cloud-float {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  35% {
+    transform: translate(26px, -7px);
+  }
+  68% {
+    transform: translate(10px, 5px);
+  }
+}
+
+@keyframes cloud-drift {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(42vw);
+  }
+}
+
+@keyframes sun-breathe {
+  0%,
+  100% {
+    transform: scale(var(--sun-scale)) rotate(0deg);
+  }
+  50% {
+    transform: scale(calc(var(--sun-scale) * 1.1)) rotate(10deg);
+  }
+}
+
+@keyframes sun-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.12);
+  }
+}
+
 .bus-ride {
   position: fixed;
   inset: 0;
@@ -695,13 +1157,13 @@ video {
 .bus-title {
   position: absolute;
   top: max(18px, env(safe-area-inset-top));
-  left: 0;
-  right: 0;
+  left: 12px;
+  right: 12px;
   z-index: 2;
   margin: 0;
   text-align: center;
   font-family: 'Pixelify Sans', monospace;
-  font-size: 1.4rem;
+  font-size: clamp(1.05rem, 5vw, 1.4rem);
 }
 
 .pixel-map {
@@ -785,10 +1247,168 @@ video {
   right: 5%;
 }
 
+.combo-car {
+  transform-box: fill-box;
+}
+
+.combo-car.pickup.driving {
+  animation: combo-in 3.1s ease-in-out forwards;
+}
+
+.combo-car.pickup.parked {
+  transform: translate(158px, 118px);
+}
+
+.combo-car.bus.waiting {
+  transform: translate(212px, 118px);
+}
+
+.combo-car.bus.driving {
+  animation: combo-out 3.2s ease-in-out forwards;
+}
+
+.combo-car.parked .bus-wheel,
+.combo-car.waiting .bus-wheel {
+  animation: none;
+}
+
+.combo-car.parked .dust,
+.combo-car.waiting .dust {
+  animation: none;
+  opacity: 0;
+}
+
+.combo-crew {
+  transform: translate(146px, 96px);
+}
+
+.pixel-person {
+  transform: translate(var(--crew-x), 0);
+}
+
+.pixel-person.p-0 {
+  --crew-x: 0px;
+}
+
+.pixel-person.p-1 {
+  --crew-x: 9px;
+}
+
+.pixel-person.p-2 {
+  --crew-x: 18px;
+}
+
+.pixel-person.p-3 {
+  --crew-x: 27px;
+}
+
+.pixel-person.p-4 {
+  --crew-x: 36px;
+}
+
+.pixel-person.p-5 {
+  --crew-x: 45px;
+}
+
+.crew-off .pixel-person {
+  animation: crew-pop 0.42s cubic-bezier(0.28, 1.5, 0.42, 1) both;
+}
+
+.crew-off .pixel-person.p-1 {
+  animation-delay: 80ms;
+}
+
+.crew-off .pixel-person.p-2 {
+  animation-delay: 150ms;
+}
+
+.crew-off .pixel-person.p-3 {
+  animation-delay: 220ms;
+}
+
+.crew-off .pixel-person.p-4 {
+  animation-delay: 290ms;
+}
+
+.crew-off .pixel-person.p-5 {
+  animation-delay: 360ms;
+}
+
+.crew-walk .pixel-person {
+  animation: crew-walk 1.55s ease-in-out forwards;
+}
+
+.crew-walk .person-bob {
+  animation: crew-step 0.32s ease-in-out infinite;
+}
+
+.crew-on .pixel-person {
+  animation: crew-board 0.55s ease-in forwards;
+}
+
 .swap-bus {
   transform-box: fill-box;
   transform-origin: center;
   animation: swap-pop 0.35s ease;
+}
+
+@keyframes combo-in {
+  from {
+    transform: translate(40px, 118px);
+  }
+  to {
+    transform: translate(158px, 118px);
+  }
+}
+
+@keyframes combo-out {
+  from {
+    transform: translate(212px, 118px);
+  }
+  to {
+    transform: translate(320px, 118px);
+  }
+}
+
+@keyframes crew-pop {
+  0% {
+    opacity: 0;
+    transform: translate(var(--crew-x), 8px) scale(0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(var(--crew-x), 0) scale(1);
+  }
+}
+
+@keyframes crew-walk {
+  from {
+    transform: translate(var(--crew-x), 0);
+  }
+  to {
+    transform: translate(calc(var(--crew-x) + 50px), 0);
+  }
+}
+
+@keyframes crew-step {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes crew-board {
+  0% {
+    opacity: 1;
+    transform: translate(calc(var(--crew-x) + 50px), 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--crew-x) + 58px), -8px) scale(0.2);
+  }
 }
 
 @keyframes swap-pop {
@@ -838,6 +1458,175 @@ video {
   .hello {
     font-size: 1.6rem;
   }
+
+  .intro-scene {
+    padding-top: 12px;
+    padding-bottom: 10px;
+  }
+
+  .polaroid-stack.pair .media-polaroid .photo:has(video),
+  .media-polaroid .photo:has(video) {
+    max-height: 34vh;
+  }
+
+  .cuddle-puppet {
+    width: min(160px, 50vw);
+    margin-top: 80px;
+  }
+}
+
+@media (max-width: 520px) {
+  .app {
+    padding:
+      max(12px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+
+  .sun {
+    top: 10px;
+    right: 8px;
+    --sun-scale: 0.72;
+  }
+
+  .cloud-a {
+    top: 10px;
+    left: 8px;
+    width: 36px;
+  }
+
+  .cloud-b {
+    top: 28px;
+    right: 46px;
+    width: 28px;
+  }
+
+  .app:has(.intro) .cloud-c,
+  .app:has(.journey) .cloud-c {
+    display: none;
+  }
+
+  .topbar {
+    padding-right: 36px;
+  }
+
+  .copy {
+    font-size: 1rem;
+  }
+
+  .pixel-btn,
+  .speech-btn {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .intro-scene {
+    padding-inline: 32px;
+  }
+
+  .pet.eve {
+    left: -16px;
+    width: 48px;
+  }
+
+  .pet.lilith {
+    right: -22px;
+    width: 64px;
+    height: 64px;
+  }
+
+  .pet.frog {
+    right: 2px;
+    width: 26px;
+  }
+
+  .spot-peek-left {
+    left: 0;
+  }
+
+  .spot-photo-peek {
+    right: 0;
+  }
+
+  .spot-tl,
+  .spot-tr {
+    top: 40px;
+  }
+
+  .pixel-map.combo .map-label {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+
+  .pixel-map.combo .map-label.start,
+  .pixel-map.combo .map-label.end {
+    bottom: 22%;
+  }
+
+  .pixel-map.combo .map-label.mid {
+    bottom: 34%;
+  }
+
+  .cuddle-scene {
+    width: 100%;
+  }
+
+  .speech-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 340px) {
+  .intro-scene {
+    padding-inline: 28px;
+  }
+
+  .couple-polaroid {
+    width: min(168px, 58vw);
+  }
+
+  .hello {
+    font-size: 1.45rem;
+  }
+
+  .intro-copy {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 400px) and (max-height: 620px) {
+  .intro {
+    gap: 8px;
+  }
+
+  .intro-scene {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .couple-polaroid {
+    width: min(150px, 50vw);
+  }
+
+  .hello {
+    font-size: 1.35rem;
+  }
+
+  .intro-copy {
+    font-size: 0.9rem;
+    line-height: 1.42;
+  }
+
+  .pet.eve {
+    width: 42px;
+  }
+
+  .pet.lilith {
+    width: 56px;
+    height: 56px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -846,15 +1635,31 @@ video {
   .couple-jump,
   .pet.frog,
   .pet.lilith .wag,
+  .pet-body.pet-eve,
+  .pet-body.pet-frog,
+  .pet-body.pet-lilith,
+  .pet-body.pet-lilith .wag,
+  .page-pet,
+  .polaroid-enter,
+  .journey.enter-fwd,
+  .journey.enter-back,
+  .mini-heart,
   .bus-wheel,
   .dust,
   .route-line,
   .sun,
+  .sun::after,
   .cloud,
+  .combo-car,
+  .pixel-person,
+  .person-bob,
   .hello,
   .intro-copy,
   .intro .pixel-btn,
   .pixel-btn,
+  .speech-btn,
+  .beat-title,
+  .beat-copy,
   .cuddle-head,
   .press-hint,
   .swap-bus {

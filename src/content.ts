@@ -265,7 +265,7 @@ export const content: Content = {
       ],
       title: 'Yearning for Lisa apu part 1 🥺',
       text: '',
-      nextLabel: 'aww ki cute tmi buly koro kno somosha ki tmr?',
+      nextLabel: 'aww,Ki cute tmi bully koro kno? somosha ki?',
     },
     {
       media: [

@@ -3,10 +3,64 @@ import { content, type BusLeg, type MediaItem, type RideHop } from './content'
 
 type Screen = 'intro' | 'journey' | 'end'
 
+type PetWho = 'eve' | 'lilith' | 'frog'
+type PetSpot =
+  | 'bl'
+  | 'br'
+  | 'tl'
+  | 'tr'
+  | 'photo-peek'
+  | 'peek-left'
+  | 'cuddle-right'
+  | 'btn-side'
+  | 'btn-left'
+  | 'mid-right'
+  | 'flower'
+  | 'end-left'
+  | 'end-right'
+  | 'end-bottom'
+
+type PetPlace = { who: PetWho; spot: PetSpot }
+
+const BEAT_PETS: Record<number, PetPlace[]> = {
+  0: [{ who: 'eve', spot: 'peek-left' }],
+  1: [{ who: 'lilith', spot: 'cuddle-right' }],
+  2: [{ who: 'eve', spot: 'tr' }],
+  3: [{ who: 'frog', spot: 'btn-side' }],
+  4: [{ who: 'frog', spot: 'btn-left' }],
+  5: [{ who: 'eve', spot: 'photo-peek' }],
+  6: [{ who: 'lilith', spot: 'tl' }],
+  7: [{ who: 'frog', spot: 'photo-peek' }],
+  8: [{ who: 'lilith', spot: 'tr' }],
+  9: [{ who: 'frog', spot: 'photo-peek' }],
+  10: [{ who: 'eve', spot: 'peek-left' }],
+  11: [{ who: 'lilith', spot: 'tr' }],
+  12: [{ who: 'frog', spot: 'btn-side' }],
+  13: [{ who: 'eve', spot: 'photo-peek' }],
+  14: [{ who: 'lilith', spot: 'peek-left' }],
+  15: [{ who: 'eve', spot: 'peek-left' }],
+  16: [{ who: 'frog', spot: 'btn-side' }],
+  17: [{ who: 'lilith', spot: 'tr' }],
+  18: [
+    { who: 'eve', spot: 'peek-left' },
+    { who: 'lilith', spot: 'photo-peek' },
+  ],
+  19: [{ who: 'frog', spot: 'btn-left' }],
+  20: [{ who: 'lilith', spot: 'photo-peek' }],
+  21: [{ who: 'eve', spot: 'flower' }],
+}
+
+const END_PETS: PetPlace[] = [
+  { who: 'eve', spot: 'end-left' },
+  { who: 'lilith', spot: 'end-right' },
+  { who: 'frog', spot: 'end-bottom' },
+]
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>('intro')
   const [beatIndex, setBeatIndex] = useState(0)
   const [busRide, setBusRide] = useState<BusLeg | null>(null)
+  const [dir, setDir] = useState<'fwd' | 'back'>('fwd')
 
   const beat = content.beats[beatIndex]
   const isFirstBeat = beatIndex === 0
@@ -15,6 +69,7 @@ export default function App() {
   const finishBusRide = () => {
     const nextIndex = beatIndex + 1
     setBusRide(null)
+    setDir('fwd')
     if (nextIndex >= content.beats.length) {
       setScreen('end')
       return
@@ -23,6 +78,7 @@ export default function App() {
   }
 
   const goNext = () => {
+    setDir('fwd')
     if (screen === 'intro') {
       setScreen('journey')
       return
@@ -44,6 +100,7 @@ export default function App() {
   }
 
   const goBack = () => {
+    setDir('back')
     if (screen === 'end') {
       setScreen('journey')
       return
@@ -81,7 +138,7 @@ export default function App() {
     <div className="app">
       <SkyBits />
       {screen === 'intro' && (
-        <section className="panel intro" key="intro">
+        <section className={`panel intro enter-${dir}`} key="intro">
           <IntroScene />
           <p className="for">for {content.forName}</p>
           <h1 className="hello">{content.introTitle}</h1>
@@ -93,7 +150,9 @@ export default function App() {
       )}
 
       {screen === 'journey' && beat && (
-        <section className="panel journey" key={`beat-${beatIndex}`}>
+        <section className={`panel journey enter-${dir}`} key={`beat-${beatIndex}`}>
+          <PageSparkle />
+          <PetStickers pets={BEAT_PETS[beatIndex] ?? []} />
           <header className="topbar">
             <button type="button" className="ghost-btn" onClick={goBack}>
               back
@@ -157,7 +216,8 @@ export default function App() {
         ))}
 
       {screen === 'end' && (
-        <section className="panel intro" key="end">
+        <section className={`panel intro enter-${dir}`} key="end">
+          <PetStickers pets={END_PETS} />
           <PixelHeart />
           <p className="copy">{content.ending}</p>
           <button type="button" className="ghost-btn" onClick={goBack}>
@@ -179,6 +239,9 @@ function MediaStage({ items }: { items: MediaItem[] }) {
       {items.map((item, itemIndex) => (
         <div
           key={`${item.src}-${itemIndex}`}
+          className="polaroid-enter"
+        >
+        <div
           className={`polaroid media-polaroid tilt-${itemIndex % 2 === 0 ? 'left' : 'right'}`}
         >
           <div className="photo">
@@ -195,6 +258,7 @@ function MediaStage({ items }: { items: MediaItem[] }) {
             )}
           </div>
           {item.caption ? <p className="copy media-copy">{item.caption}</p> : null}
+        </div>
         </div>
       ))}
     </div>
@@ -346,8 +410,42 @@ function PixelVehicle({ kind }: { kind: 'bus' | 'pickup' }) {
   )
 }
 
+type ComboPhase = 'in' | 'off' | 'walk' | 'on' | 'out'
+
+const CREW = [
+  { shirt: '#1c1c1c', pants: '#c4a574', hair: '#3a2433', mark: '#fff6eb' },
+  { shirt: '#8b3a44', pants: '#ee6b6b', hair: '#2a1a18' },
+  { shirt: '#9bb89a', pants: '#3a2433', hair: '#3a2433' },
+  { shirt: '#f5f0e8', pants: '#2c3d6b', hair: '#3a2433' },
+  { shirt: '#243556', pants: '#3a2433', hair: '#2a1a18' },
+  { shirt: '#8ec5e8', pants: '#3a2433', hair: '#4a3028' },
+] as const
+
+function PixelPerson({
+  shirt,
+  pants,
+  hair,
+  mark,
+}: {
+  shirt: string
+  pants: string
+  hair: string
+  mark?: string
+}) {
+  return (
+    <g>
+      <rect x="2" y="-2" width="5" height="3" fill={hair} />
+      <rect x="2" y="1" width="5" height="3" fill="#f3d4c2" />
+      <rect x="1" y="4" width="7" height="6" fill={shirt} />
+      {mark ? <rect x="3" y="5" width="3" height="2" fill={mark} /> : null}
+      <rect x="1" y="10" width="3" height="5" fill={pants} />
+      <rect x="5" y="10" width="3" height="5" fill={pants} />
+    </g>
+  )
+}
+
 function ComboRide({ ride, onDone }: { ride: BusLeg; onDone: () => void }) {
-  const [phase, setPhase] = useState<'in' | 'swap' | 'out'>('in')
+  const [phase, setPhase] = useState<ComboPhase>('in')
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -356,17 +454,21 @@ function ComboRide({ ride, onDone }: { ride: BusLeg; onDone: () => void }) {
       return () => window.clearTimeout(timer)
     }
 
-    const waits = { in: 3200, swap: 900, out: 3200 } as const
+    const waits = { in: 3200, off: 1100, walk: 1700, on: 800, out: 3400 } as const
+    const next: Record<ComboPhase, ComboPhase | 'done'> = {
+      in: 'off',
+      off: 'walk',
+      walk: 'on',
+      on: 'out',
+      out: 'done',
+    }
     const timer = window.setTimeout(() => {
-      if (phase === 'in') {
-        setPhase('swap')
+      const step = next[phase]
+      if (step === 'done') {
+        onDone()
         return
       }
-      if (phase === 'swap') {
-        setPhase('out')
-        return
-      }
-      onDone()
+      setPhase(step)
     }, waits[phase])
     return () => window.clearTimeout(timer)
   }, [phase, onDone])
@@ -374,12 +476,19 @@ function ComboRide({ ride, onDone }: { ride: BusLeg; onDone: () => void }) {
   const title =
     phase === 'in'
       ? `${ride.from} to ${ride.to}`
-      : phase === 'swap'
-        ? 'pickup to bus'
-        : `${ride.to} to ${ride.then?.to ?? 'Dolphin Mor'}`
+      : phase === 'off'
+        ? 'hopping off'
+        : phase === 'walk'
+          ? 'switching at Chokoria'
+          : phase === 'on'
+            ? 'onto the bus'
+            : `${ride.to} to ${ride.then?.to ?? 'Dolphin Mor'}`
+
+  const showCrew = phase === 'off' || phase === 'walk' || phase === 'on'
 
   return (
     <div className="bus-ride" role="status">
+      <SkyBits tone="ride" />
       <p className="bus-title">{title}</p>
       <div className="pixel-map combo">
         <svg
@@ -389,9 +498,10 @@ function ComboRide({ ride, onDone }: { ride: BusLeg; onDone: () => void }) {
           aria-hidden="true"
           shapeRendering="crispEdges"
         >
-          <rect width="360" height="220" fill="#8ecf9a" />
-          <rect x="0" y="0" width="70" height="220" fill="#6bb07e" />
-          <rect x="290" y="0" width="70" height="220" fill="#6ec3dc" />
+          <rect width="360" height="220" fill="#8ec8e8" />
+          <rect x="0" y="52" width="360" height="168" fill="#8ecf9a" />
+          <rect x="0" y="52" width="70" height="168" fill="#6bb07e" />
+          <rect x="290" y="52" width="70" height="168" fill="#6ec3dc" />
           <rect x="270" y="150" width="90" height="70" fill="#5bb3d3" />
           <rect x="250" y="186" width="40" height="34" fill="#6ec3dc" />
           <path
@@ -410,31 +520,33 @@ function ComboRide({ ride, onDone }: { ride: BusLeg; onDone: () => void }) {
             strokeLinecap="square"
             className="route-line"
           />
-          <path id="combo-in" d="M40 118 H180" fill="none" stroke="none" />
-          <path id="combo-out" d="M180 118 H320" fill="none" stroke="none" />
 
-          <MountainIcon x={22} y={54} />
-          <TownIcon x={166} y={52} />
-          <DolphinIcon x={300} y={52} />
+          <MountainIcon x={22} y={58} />
+          <TownIcon x={166} y={56} />
+          <DolphinIcon x={300} y={56} />
 
           <MapPin x={40} y={118} />
           <MapPin x={180} y={118} fill="#ffb14a" />
           <MapPin x={320} y={118} fill="#5bb3d3" />
 
-          {phase === 'swap' ? (
-            <g transform="translate(180, 118)">
-              <g className="moving-bus swap-bus">
-                <PixelVehicle kind="bus" />
-              </g>
+          <g className={`combo-car pickup ${phase === 'in' ? 'driving' : 'parked'}`}>
+            <PixelVehicle kind="pickup" />
+          </g>
+          <g className={`combo-car bus ${phase === 'out' ? 'driving' : 'waiting'}`}>
+            <PixelVehicle kind="bus" />
+          </g>
+
+          {showCrew ? (
+            <g className={`combo-crew crew-${phase}`}>
+              {CREW.map((person, index) => (
+                <g key={index} className={`pixel-person p-${index}`}>
+                  <g className="person-bob">
+                    <PixelPerson {...person} />
+                  </g>
+                </g>
+              ))}
             </g>
-          ) : (
-            <g className="moving-bus" key={phase}>
-              <PixelVehicle kind={phase === 'in' ? 'pickup' : 'bus'} />
-              <animateMotion dur="3.1s" fill="freeze" rotate="auto">
-                <mpath href={phase === 'in' ? '#combo-in' : '#combo-out'} />
-              </animateMotion>
-            </g>
-          )}
+          ) : null}
         </svg>
         <span className="map-label start">{ride.from}</span>
         <span className="map-label mid">{ride.to}</span>
@@ -460,6 +572,7 @@ function BusRide({ ride, onDone }: { ride: BusLeg; onDone: () => void }) {
 
   return (
     <div className="bus-ride" role="status">
+      <SkyBits tone="ride" />
       <p className="bus-title">
         {hop.from} to {hop.to}
       </p>
@@ -516,12 +629,50 @@ function BusRide({ ride, onDone }: { ride: BusLeg; onDone: () => void }) {
   )
 }
 
-function SkyBits() {
+function SkyBits({ tone = 'page' }: { tone?: 'page' | 'ride' }) {
   return (
-    <div className="skybits" aria-hidden="true">
+    <div className={tone === 'ride' ? 'skybits ride-sky' : 'skybits'} aria-hidden="true">
       <span className="sun" />
       <span className="cloud cloud-a" />
       <span className="cloud cloud-b" />
+      <span className="cloud cloud-c" />
+    </div>
+  )
+}
+
+function PetStickers({ pets }: { pets: PetPlace[] }) {
+  if (pets.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="page-pets" aria-hidden="true">
+      {pets.map((pet) => (
+        <span key={`${pet.who}-${pet.spot}`} className={`page-pet spot-${pet.spot}`}>
+          {pet.who === 'lilith' ? (
+            <span className="pet-body pet-lilith">
+              <img src="/intro/lilith.png?v=2" alt="" />
+              <img className="wag" src="/intro/lilith-wag.png" alt="" />
+            </span>
+          ) : (
+            <img
+              className={`pet-body pet-${pet.who}`}
+              src={pet.who === 'eve' ? '/intro/eve.png?v=2' : '/intro/frog.png'}
+              alt=""
+            />
+          )}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function PageSparkle() {
+  return (
+    <div className="page-sparkle" aria-hidden="true">
+      <span className="mini-heart h1" />
+      <span className="mini-heart h2" />
+      <span className="mini-heart h3" />
     </div>
   )
 }
