@@ -19,13 +19,19 @@
   box-sizing: border-box;
 }
 
-html,
+html {
+  margin: 0;
+  height: auto;
+  min-height: 100%;
+  overflow-x: clip;
+}
+
 body,
 #root {
   margin: 0;
   min-height: 100%;
-  min-height: 100dvh;
-  overflow-x: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .skybits {
@@ -44,13 +50,14 @@ video {
 
 .app {
   position: relative;
-  min-height: 100dvh;
-  overflow-x: hidden;
+  min-height: 100svh;
+  overflow-x: clip;
+  overflow-y: visible;
   padding:
-    max(28px, calc(env(safe-area-inset-top) + 16px))
-    max(16px, env(safe-area-inset-right))
-    max(28px, calc(env(safe-area-inset-bottom) + 16px))
-    max(16px, env(safe-area-inset-left));
+    max(16px, env(safe-area-inset-top, 0px))
+    max(16px, env(safe-area-inset-right, 0px))
+    max(24px, env(safe-area-inset-bottom, 0px))
+    max(16px, env(safe-area-inset-left, 0px));
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -63,9 +70,21 @@ video {
   position: relative;
   z-index: 1;
   width: min(440px, 100%);
-  min-height: calc(100dvh - 48px);
+  min-height: calc(100svh - 48px);
   display: flex;
   flex-direction: column;
+}
+
+@media (display-mode: standalone) {
+  .app {
+    min-height: 100dvh;
+    padding-top: max(20px, calc(env(safe-area-inset-top, 0px) + 12px));
+    padding-bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+  }
+
+  .panel {
+    min-height: calc(100dvh - 48px);
+  }
 }
 
 .panel.enter-fwd {
@@ -2175,10 +2194,10 @@ video {
 @media (max-width: 520px) {
   .app {
     padding:
-      max(32px, calc(env(safe-area-inset-top) + 18px))
-      max(12px, env(safe-area-inset-right))
-      max(24px, calc(env(safe-area-inset-bottom) + 16px))
-      max(12px, env(safe-area-inset-left));
+      max(12px, env(safe-area-inset-top, 0px))
+      max(12px, env(safe-area-inset-right, 0px))
+      max(20px, env(safe-area-inset-bottom, 0px))
+      max(12px, env(safe-area-inset-left, 0px));
   }
 
   .sun {
