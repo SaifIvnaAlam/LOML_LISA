@@ -1198,7 +1198,11 @@ function BusRide({ ride, onDone }: { ride: BusLeg; onDone: () => void }) {
           <MapPin x={look.start.x + 6} y={look.start.y + 6} />
           <MapPin x={look.end.x + 6} y={look.end.y + 6} />
           <g className="moving-bus">
-            <PixelVehicle kind={hop.vehicle ?? 'bus'} />
+            {hop.vehicle === 'boat' ? (
+              <PixelNouka />
+            ) : (
+              <PixelVehicle kind={hop.vehicle === 'pickup' ? 'pickup' : 'bus'} />
+            )}
             <animateMotion dur="4s" fill="freeze" rotate="auto">
               <mpath href={`#${routeId}`} />
             </animateMotion>
